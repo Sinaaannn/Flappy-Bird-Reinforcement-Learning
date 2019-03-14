@@ -136,10 +136,10 @@ def train(network,start):
         #print("state_1_batch size: ", state_1_batch.shape)
 
         #if torch.cuda.is_available():
-        state_batch = state_batch
-        action_batch = action_batch
-        reward_batch = reward_batch
-        state_1_batch = state_1_batch
+        state_batch = state_batch.cuda()
+        action_batch = action_batch.cuda()
+        reward_batch = reward_batch.cuda()
+        state_1_batch = state_1_batch.cuda()
         
         # get output for the next state
         output_1_batch = network(state_1_batch)
