@@ -63,7 +63,7 @@ class FlappyBird:
         if candy.colliderect(self.bird):
             self.candyX = random.randint(80,400)
             self.candyY = random.randint(80,550)
-            reward = 4
+            reward = 3
 
         if  self.candyX <= -45:
             self.candyX = random.randint(80,400)
@@ -145,18 +145,19 @@ class FlappyBird:
         self.screen.blit(self.topPipe, (self.wallX,0-self.gap-self.offset))
         self.screen.blit(self.topPipe2, (self.secondWallX,0-self.gap-self.offset2))
         self.screen.blit(self.birdSprite, (70, self.birdY))
-        self.screen.blit(self.candySprite,(self.candyX,self.candyY))
             
         #self.updateCandy()
-        self.candyX -= 2.5
-        candy = pygame.Rect(self.candyX,self.candyY,40,40)
-        if candy.colliderect(self.bird):
-            self.candyX = random.randint(80,400)
-            self.candyY = random.randint(80,550)
-            reward = 4
-        if  self.candyX <= -45:
-            self.candyX = random.randint(80,400)
-            self.candyY = random.randint(80,550)
+        if self.score > 1:
+            self.screen.blit(self.candySprite,(self.candyX,self.candyY))
+            self.candyX -= 2.5
+            candy = pygame.Rect(self.candyX,self.candyY,40,40)
+            if candy.colliderect(self.bird):
+                self.candyX = random.randint(80,400)
+                self.candyY = random.randint(80,550)
+                reward = 4
+            if  self.candyX <= -45:
+                self.candyX = random.randint(80,400)
+                self.candyY = random.randint(80,550)
         #self.updatePipes()
         self.wallX -= 2.5
         self.secondWallX -= 2.5
