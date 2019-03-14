@@ -19,7 +19,7 @@ class NeuralNetwork(nn.Module):
         super(NeuralNetwork,self).__init__()
         self.numberOfActions = 2  # Flip or do nothing
         self.gamma = 0.99
-        self.initEpsilon = 1.0
+        self.initEpsilon = 0.1
         self.finalEpsilon = 0.05
         self.numberOfIterations = 1500000
         self.replayMemorySize = 500000
