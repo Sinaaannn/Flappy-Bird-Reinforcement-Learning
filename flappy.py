@@ -42,11 +42,11 @@ class FlappyBird:
 
         if self.wallX == 10:
             self.score += 1
-            self.reward = 1
+            reward = 2
 
         if self.secondWallX == 10:
             self.score += 1
-            self.reward = 1
+            reward = 2
 
         if self.wallX <= -48:
             self.wallX = 450
@@ -59,11 +59,11 @@ class FlappyBird:
 
     def updateCandy(self):
         self.candyX -= 2.5
-        candy = pygame.Rect(self.candyX,self.candyY,30,30)
+        candy = pygame.Rect(self.candyX,self.candyY,40,40)
         if candy.colliderect(self.bird):
             self.candyX = random.randint(80,400)
             self.candyY = random.randint(80,550)
-            self.reward = 3
+            reward = 4
 
         if  self.candyX <= -45:
             self.candyX = random.randint(80,400)
@@ -147,13 +147,37 @@ class FlappyBird:
         self.screen.blit(self.birdSprite, (70, self.birdY))
         self.screen.blit(self.candySprite,(self.candyX,self.candyY))
             
-        self.updateCandy()    
-        self.updatePipes()
+        #self.updateCandy()
+        self.candyX -= 2.5
+        candy = pygame.Rect(self.candyX,self.candyY,40,40)
+        if candy.colliderect(self.bird):
+            self.candyX = random.randint(80,400)
+            self.candyY = random.randint(80,550)
+            reward = 4
+        if  self.candyX <= -45:
+            self.candyX = random.randint(80,400)
+            self.candyY = random.randint(80,550)
+        #self.updatePipes()
+        self.wallX -= 2.5
+        self.secondWallX -= 2.5
+        if self.wallX == 10:
+            self.score += 1
+            reward = 2
+
+        if self.secondWallX == 10:
+            self.score += 1
+            reward = 2
+
+        if self.wallX <= -48:
+            self.wallX = 450
+            self.offset = random.randint(-110, 110)
+            
+        if self.secondWallX <= -48:
+            self.secondWallX = 450
+            self.offset2 = random.randint(-100, 100)
         self.updateBird()
         self.draw_score_text(self.screen,str(self.score),30,200,80)
 
         image_data = pygame.surfarray.array3d(pygame.display.get_surface())
-
         pygame.display.update()
-        #print("REWARD: {:.1f} Terminal: {}".format(self.reward,self.terminal))
         return image_data, reward, terminal
