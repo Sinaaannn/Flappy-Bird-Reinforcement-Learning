@@ -47,8 +47,8 @@ def preProcess(image):
     imageTensor = imageData.transpose(2,0,1)
     imageTensor = imageTensor.astype(np.float32)
     imageTensor = torch.from_numpy(imageTensor)
-    if torch.cuda.is_available():
-        imageTensor = imageTensor.cuda()
+    #if torch.cuda.is_available():
+    #    imageTensor = imageTensor.cuda()
     return imageTensor
 
 def initWeights(net):
@@ -89,8 +89,8 @@ def train(network,start):
         output = network(state)[0]
 
         action = torch.zeros([network.numberOfActions], dtype=torch.float32 )
-        if torch.cuda.is_available():
-            action = action.cuda()
+        #if torch.cuda.is_available():
+        #    action = action.cuda()
 
         random_action = random.random() <= epsilon
         if random_action:
@@ -100,8 +100,8 @@ def train(network,start):
         action_index = [torch.randint(network.numberOfActions, torch.Size([]), dtype=torch.int )
                         if random_action else torch.argmax(output)][0]
 
-        if torch.cuda.is_available():
-            action_index = action_index.cuda()
+        #if torch.cuda.is_available():
+        #    action_index = action_index.cuda()
 
         # Activate that index
         action[action_index] = 1
@@ -135,11 +135,11 @@ def train(network,start):
         state_1_batch = torch.cat(tuple(d[3] for d in minibatch))
         #print("state_1_batch size: ", state_1_batch.shape)
 
-        if torch.cuda.is_available():
-            state_batch = state_batch.cuda()
-            action_batch = action_batch.cuda()
-            reward_batch = reward_batch.cuda()
-            state_1_batch = state_1_batch.cuda()
+        #if torch.cuda.is_available():
+        state_batch = state_batch
+        action_batch = action_batch
+        reward_batch = reward_batch
+        state_1_batch = state_1_batch
         
         # get output for the next state
         output_1_batch = network(state_1_batch)
@@ -166,6 +166,8 @@ def train(network,start):
         # returns a new Tensor, detached from the current graph, the result will never require gradient
         y_batch = y_batch.detach()
 
+        output = network(state)[0].detach()
+
         # calculate loss
         loss = criterion(q_value, y_batch)
 
@@ -178,7 +180,7 @@ def train(network,start):
         iteration += 1
 
         if iteration % 25000 == 0:
-            torch.save(model, "trained_model/current_model_" + str(iteration) + ".pth")
+            torch.save(model,"trained_model/current_model_" + str(iteration) + ".pth")
               
         print("total iteration: {} Elapsed time: {:.2f} epsilon: {:.5f}"
                " action: {} Reward: {:.1f}".format(iteration,((time.time()-start)/60),epsilon,action_index.cpu().detach().numpy(),reward.numpy()[0][0]))
@@ -206,3 +208,4 @@ def main(mode):
 
 if __name__ == "__main__":
     main(sys.argv[1])
+
