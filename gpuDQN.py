@@ -11,6 +11,7 @@ import time
 import random
 from collections import deque
 from flappy import FlappyBird
+import csv
 
 
 class NeuralNetwork(nn.Module):
@@ -22,10 +23,9 @@ class NeuralNetwork(nn.Module):
         self.initEpsilon = 0.1
         self.finalEpsilon = 0.05
         self.numberOfIterations = 1500000
-        self.replayMemorySize = 500000
+        self.replayMemorySize = 1000000
         self.minibatchSize = 32
         self.explore = 500000
-        self.observe = 30000
 
         self.conv1 = nn.Conv2d(in_channels = 4, out_channels = 32, kernel_size = 8, stride = 4)
         self.conv2 = nn.Conv2d(32, 64, 4, 2)
@@ -87,6 +87,8 @@ def train(network,start):
     while iteration < network.numberOfIterations:
         # get output from the neural network
         output = network(state)[0]
+        
+        qValue = float(torch.max(output))
 
         action = torch.zeros([network.numberOfActions], dtype=torch.float32 )
         #if torch.cuda.is_available():
@@ -110,6 +112,7 @@ def train(network,start):
             epsilon -= (network.initEpsilon - network.finalEpsilon) / network.explore
 
         imageData_1, reward, terminal = game.run(action)
+        reward_data = reward
         imageData_1 = preProcess(imageData_1)
 
         state_1 = torch.cat((state.squeeze(0)[1:, :, :], imageData_1)).unsqueeze(0)
@@ -136,10 +139,10 @@ def train(network,start):
         #print("state_1_batch size: ", state_1_batch.shape)
 
         #if torch.cuda.is_available():
-        state_batch = state_batch.cuda()
-        action_batch = action_batch.cuda()
-        reward_batch = reward_batch.cuda()
-        state_1_batch = state_1_batch.cuda()
+        #state_batch = state_batch
+        #action_batch = action_batch
+        #reward_batch = reward_batch
+        #state_1_batch = state_1_batch
         
         # get output for the next state
         output_1_batch = network(state_1_batch)
@@ -166,8 +169,6 @@ def train(network,start):
         # returns a new Tensor, detached from the current graph, the result will never require gradient
         y_batch = y_batch.detach()
 
-        output = network(state)[0].detach()
-
         # calculate loss
         loss = criterion(q_value, y_batch)
 
@@ -179,8 +180,17 @@ def train(network,start):
         state = state_1
         iteration += 1
 
-        if iteration % 25000 == 0:
-            torch.save(model,"trained_model/current_model_" + str(iteration) + ".pth")
+        if iteration % 1000 == 0:
+            graphData = [iteration, reward_data, qValue ]
+
+            with open('data_graph.csv', mode='a') as csv_file:
+                
+                writer = csv.writer(csv_file)
+                writer.writerow(graphData)
+
+        #print("Graph data: ", graphData)
+        if iteration % 20000 == 0:
+            torch.save(network,"trained_model/current_model_" + str(iteration) + ".pth")
               
         print("total iteration: {} Elapsed time: {:.2f} epsilon: {:.5f}"
                " action: {} Reward: {:.1f}".format(iteration,((time.time()-start)/60),epsilon,action_index.cpu().detach().numpy(),reward.numpy()[0][0]))
@@ -208,4 +218,3 @@ def main(mode):
 
 if __name__ == "__main__":
     main(sys.argv[1])
-
